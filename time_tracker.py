@@ -1,44 +1,54 @@
+import tkinter
 from tkinter import Tk, ttk
 import process_tracker
 import psutil
 import win32gui
 import win32process
 import time
+from PIL import Image, ImageTk
 
 
 elapsed_time = 0
 start_time = time.time()
-
+process_images = {}
 
 def tracker():
-    print(f"process_tracker func: {process_tracker.get_foreground_process_info()}")
+    # print(f"process_tracker func: {process_tracker.get_foreground_process_info()}")
 
     # TODO: maybe can accomplish this without global variables?
     global elapsed_time
     global start_time
+    global process_images
 
     # Get current process info and put it into a tuple
     current_process_id = win32process.GetWindowThreadProcessId(win32gui.GetForegroundWindow())
     current_process_name = psutil.Process(current_process_id[-1]).name()
     current_process_info = current_process_id, current_process_name
+    current_process_path = process_tracker.get_process_path(current_process_name)  # TODO: add logic that only runs this code when process_name has changed?
+    current_process_icon = process_tracker.get_icon(current_process_path)
+
+    if current_process_icon is not None:
+        # Store process icons in a dictionary to efficiently manage image references
+        # and prevent potential garbage collection issues.
+        process_images[current_process_name] = current_process_icon
 
     # Updates information if the foreground process has not changed
     if current_process_info == process_tracker.previous_process_info:
         elapsed_time = time.time() - start_time
-        process_tracker.update_treeview(tree, current_process_name, elapsed_time)
+        process_tracker.update_treeview(tree, current_process_name, elapsed_time, process_images[current_process_name])
         start_time = time.time()
 
     # Handles process changes and starts timer when a change is detected
     if current_process_info != process_tracker.previous_process_info:
         process_tracker.handle_process_change(current_process_info)
-        process_tracker.update_treeview(tree, current_process_name, elapsed_time)
+        process_tracker.update_treeview(tree, current_process_name, elapsed_time, process_images[current_process_name])
         start_time = time.time()
 
     root.after(250, tracker)
 
 
 # Initializes root window
-root = Tk()
+root = tkinter.Tk()
 
 # Set root window title and dimensions + root window resizing functionality
 root.title("Time Tracker")
@@ -55,22 +65,25 @@ root.grid_rowconfigure(0, weight=1)
 root.grid_rowconfigure(1, weight=1)
 
 # Tree view for sorting and displaying process data
-columns = ("Process", "URL", "Time Logged")  # TODO: Add extra columns?
-tree = ttk.Treeview(root, columns=columns, show="headings", height=5)
+columns = ("process_name", "url", "time_logged")  # TODO: Add extra columns?
+tree = ttk.Treeview(root, columns=columns, displaycolumns=("url", "time_logged"), height=5)
 
 # Adjusting attributes of treeview
-tree.heading("Process", text="Process")  # Sets heading text for each column
-tree.heading("URL", text="URL")
-tree.heading("Time Logged", text="Time Logged")
-tree.column("Process", minwidth=100, width=420)  # Adjusts sizes of columns and treeview
-tree.column("URL", minwidth=100, width=420)  # TODO: Add max-width for formatting purposes
-tree.column("Time Logged", minwidth=100, width=420)
+tree.heading("#0", text="Process")  # Sets heading text for each column
+tree.heading("process_name", text="Process Name")
+tree.heading("url", text="URL")
+tree.heading("time_logged", text="Time Logged")
+
+tree.column("process_name", width=0)  # Adjusts sizes of columns and treeview
+tree.column("url", minwidth=100, width=420)  # TODO: Add max-width for formatting purposes
+tree.column("time_logged", minwidth=100, width=420)
 
 tree.grid(row=0, column=0, columnspan=3, sticky='nsew')  # Spans treeview across top 3 columns and top row.
 
 # TODO: Add scroll bar for treeview navigation
 # TODO: Allow for sorting of treeview columns (sort by most time spent, alphabetical order, etc.)
 
+# Run process tracker and the main loop
 tracker()  # TODO: come back to when done separating logic from GUI
 root.mainloop()
 
