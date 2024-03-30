@@ -5,7 +5,6 @@ import psutil
 import win32gui
 import win32process
 import time
-from PIL import Image, ImageTk
 
 
 elapsed_time = 0
@@ -13,7 +12,6 @@ start_time = time.time()
 process_images = {}
 
 def tracker():
-    # print(f"process_tracker func: {process_tracker.get_foreground_process_info()}")
 
     # TODO: maybe can accomplish this without global variables?
     global elapsed_time
@@ -87,5 +85,4 @@ tree.grid(row=0, column=0, columnspan=3, sticky='nsew')  # Spans treeview across
 tracker()  # TODO: come back to when done separating logic from GUI
 root.mainloop()
 
-# root.after(1000, track_processes(tree))
 tree.focus()

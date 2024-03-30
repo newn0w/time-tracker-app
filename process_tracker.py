@@ -1,11 +1,9 @@
-import os
 import wmi
 import time
-import tkinter
 import psutil
 import win32gui
 import win32process
-import icoextract  # TODO: maybe remove? use PIL instead?
+import icoextract
 from PIL import Image, ImageTk
 
 previous_process_info = None
@@ -102,26 +100,23 @@ def get_icon(path):
         icon_extractor = icoextract.IconExtractor(path)  # Initializes IconExtractor object with path parameter
         file_icon = icon_extractor.get_icon()  # Stores the executable icon as a BytesIO object
         icon_data = Image.open(file_icon)  # Reads the BytesIO object and produces the raw bytes
-        resized_icon = icon_data.resize((16, 16))
+        resized_icon = icon_data.resize((16, 16))  # Resize the image to a more appropriate size
         process_icon = ImageTk.PhotoImage(resized_icon)
 
-        print("File name gotten!")
-        print(f"File icon: {resized_icon}")
-        print("Attempting to show image...")
-        # icon_data.show()
-        print(f"Printing ImageTk variable from get_icon: {process_icon}")
         return process_icon
+
     except icoextract.NoIconsAvailableError:
         print(icoextract.NoIconsAvailableError)  # TODO: Implement handling of cases w/ no icon
 
 
 def update_treeview(tree, process_name, elapsed_time, process_icon):
-    """process_icon
+    """
     Updates an existing item in the Treeview with the newly elapsed time, or inserts a new item
     if it doesn't exist yet within the Treeview.
 
     :param tree: The treeview to insert into or modify.
     :param process_name: The name of the process to insert.
+    :param process_icon: The icon of the process to insert.
     :param elapsed_time: The total time spent on the process.
     """
 
@@ -138,7 +133,6 @@ def update_treeview(tree, process_name, elapsed_time, process_icon):
         tree.item(search_output, image=process_icon)
     else:
         tree.insert("", 0, image=process_icon, text=process_name, value=(process_name, "TO ADD", elapsed_time))
-
 
 
 def tree_search(tree, item_name):
