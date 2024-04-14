@@ -1,5 +1,5 @@
 import tkinter
-from tkinter import Tk, ttk
+from tkinter import ttk
 import process_tracker
 import psutil
 import win32gui
@@ -11,6 +11,7 @@ elapsed_time = 0
 start_time = time.time()
 process_images = {}
 
+
 def tracker():
 
     # TODO: maybe can accomplish this without global variables?
@@ -19,11 +20,14 @@ def tracker():
     global process_images
 
     # Get current process info and put it into a tuple
-    current_process_id = win32process.GetWindowThreadProcessId(win32gui.GetForegroundWindow())
-    current_process_name = psutil.Process(current_process_id[-1]).name()
-    current_process_info = current_process_id, current_process_name
-    current_process_path = process_tracker.get_process_path(current_process_name)  # TODO: add logic that only runs this code when process_name has changed?
-    current_process_icon = process_tracker.get_icon(current_process_path)
+    try:
+        current_process_id = win32process.GetWindowThreadProcessId(win32gui.GetForegroundWindow())
+        current_process_name = psutil.Process(current_process_id[-1]).name()
+        current_process_info = current_process_id, current_process_name
+        current_process_path = process_tracker.get_process_path(current_process_name)  # TODO: add logic that only runs this code when process_name has changed?
+        current_process_icon = process_tracker.get_icon(current_process_path)
+    except psutil.NoSuchProcess or ValueError:
+        root.after(250, tracker)
 
     if current_process_icon is not None:
         # Store process icons in a dictionary to efficiently manage image references

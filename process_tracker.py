@@ -96,6 +96,16 @@ def get_icon(path):
     :return: The icon for the process whose path was given.
     """
 
+    # If no path is found, get path for placeholder icon and return it instead
+    if path is None:
+        placeholder_path = os.path.join("symbol_iconnotfound.png")
+
+        with open(placeholder_path, 'rb') as placeholder_file:
+            placeholder_data = placeholder_file.read()
+
+        placeholder_image = ImageTk.PhotoImage(data=placeholder_data)
+        return placeholder_image
+
     # Attempt to extract icon from path parameter
     try:
         icon_extractor = icoextract.IconExtractor(path)  # Initializes IconExtractor object with path parameter
@@ -107,7 +117,13 @@ def get_icon(path):
         return process_icon
 
     except icoextract.NoIconsAvailableError:
-        print(icoextract.NoIconsAvailableError)  # TODO: Implement handling of cases w/ no icon
+        placeholder_path = os.path.join("symbol_iconnotfound.png")
+
+        with open(placeholder_path, 'rb') as placeholder_file:
+            placeholder_data = placeholder_file.read()
+
+        placeholder_image = ImageTk.PhotoImage(data=placeholder_data)
+        return placeholder_image
 
 
 def update_treeview(tree, process_name, elapsed_time, process_icon):
