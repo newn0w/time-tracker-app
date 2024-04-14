@@ -1,3 +1,5 @@
+import os
+
 import wmi
 import time
 import psutil
@@ -7,7 +9,6 @@ import icoextract
 from PIL import Image, ImageTk
 
 previous_process_info = None
-process_data = {}
 
 
 # Get and store data of the current foreground process
@@ -128,6 +129,7 @@ def update_treeview(tree, process_name, elapsed_time, process_icon):
     if search_output:
         item_elapsed_time = float(tree.item(search_output, "values")[2])  # Converts time value to float for addition
         tree.set(search_output, column=2, value=elapsed_time + item_elapsed_time)  # Updates the item in the treeview
+        tree.move(search_output, "", 0)
 
         # Set image again after updating time due to GUI redrawing
         tree.item(search_output, image=process_icon)
@@ -150,9 +152,7 @@ def tree_search(tree, item_name):
     # Compares names of all values in tree to the searched process name
     for child in children:
         values = tree.item(child, 'values')
-        print(values)
         if values[0] == item_name:
-            print(f"value[0]: {child}")
             return child
 
     return None
