@@ -1,3 +1,4 @@
+import datetime
 import os
 
 import wmi
@@ -126,15 +127,16 @@ def get_icon(path):
         return placeholder_image
 
 
-def update_treeview(tree, process_name, elapsed_time, process_icon):
+def update_treeview(tree, process_name, elapsed_time, time_val, process_icon):
     """
     Updates an existing item in the Treeview with the newly elapsed time, or inserts a new item
     if it doesn't exist yet within the Treeview.
 
+    :param time_val: The total time of the process in seconds.
     :param tree: The treeview to insert into or modify.
     :param process_name: The name of the process to insert.
     :param process_icon: The icon of the process to insert.
-    :param elapsed_time: The total time spent on the process.
+    :param elapsed_time: The total time spent on the process displayed as a deltatime object (hh:mm:ss.xxxxxx).
     """
 
     global previous_process_info
@@ -143,14 +145,18 @@ def update_treeview(tree, process_name, elapsed_time, process_icon):
     search_output = tree_search(tree, process_name)
 
     if search_output:
-        item_elapsed_time = float(tree.item(search_output, "values")[2])  # Converts time value to float for addition
-        tree.set(search_output, column=2, value=elapsed_time + item_elapsed_time)  # Updates the item in the treeview
+        item_elapsed_time = float(tree.item(search_output, "values")[3])  # Converts time value to float for addition
+        elapsed_time_obj = datetime.timedelta(seconds=time_val)
+        item_elapsed_time_obj = datetime.timedelta(seconds=item_elapsed_time)
+        tree.set(search_output, column=2, value=elapsed_time_obj + item_elapsed_time_obj)  # Updates the item in the treeview
+        tree.set(search_output, column=3, value=time_val + item_elapsed_time)
+
         tree.move(search_output, "", 0)
 
         # Set image again after updating time due to GUI redrawing
         tree.item(search_output, image=process_icon)
     else:
-        tree.insert("", 0, image=process_icon, text=process_name, value=(process_name, "TO ADD", elapsed_time))
+        tree.insert("", 0, image=process_icon, text=process_name, value=(process_name, "TO ADD", elapsed_time, time_val))
 
 
 def tree_search(tree, item_name):

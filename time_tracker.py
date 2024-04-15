@@ -1,3 +1,4 @@
+import datetime
 import tkinter
 from tkinter import ttk
 import process_tracker
@@ -37,13 +38,15 @@ def tracker():
     # Updates information if the foreground process has not changed
     if current_process_info == process_tracker.previous_process_info:
         elapsed_time = time.time() - start_time
-        process_tracker.update_treeview(tree, current_process_name, elapsed_time, process_images[current_process_name])
+        time_obj = datetime.timedelta(seconds=elapsed_time)
+        process_tracker.update_treeview(tree, current_process_name, time_obj, elapsed_time, process_images[current_process_name])
         start_time = time.time()
 
     # Handles process changes and starts timer when a change is detected
     if current_process_info != process_tracker.previous_process_info:
+        time_obj = datetime.timedelta(seconds=elapsed_time)
         process_tracker.handle_process_change(current_process_info)
-        process_tracker.update_treeview(tree, current_process_name, elapsed_time, process_images[current_process_name])
+        process_tracker.update_treeview(tree, current_process_name, time_obj, elapsed_time, process_images[current_process_name])
         start_time = time.time()
 
     root.after(250, tracker)
@@ -67,7 +70,7 @@ root.grid_rowconfigure(0, weight=1)
 root.grid_rowconfigure(1, weight=1)
 
 # Tree view for sorting and displaying process data
-columns = ("process_name", "url", "time_logged")  # TODO: Add extra columns?
+columns = ("process_name", "url", "time_logged", "time_val")  # TODO: Add extra columns?
 tree = ttk.Treeview(root, columns=columns, displaycolumns=("url", "time_logged"), height=5)
 
 # Adjusting attributes of treeview
@@ -75,10 +78,12 @@ tree.heading("#0", text="Process")  # Sets heading text for each column
 tree.heading("process_name", text="Process Name")
 tree.heading("url", text="URL")
 tree.heading("time_logged", text="Time Logged")
+tree.heading("time_val", text="Time Value")
 
 tree.column("process_name", width=0)  # Adjusts sizes of columns and treeview
 tree.column("url", minwidth=100, width=420)  # TODO: Add max-width for formatting purposes
 tree.column("time_logged", minwidth=100, width=420)
+tree.column("time_val", width=0)
 
 tree.grid(row=0, column=0, columnspan=3, sticky='nsew')  # Spans treeview across top 3 columns and top row.
 
