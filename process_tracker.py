@@ -1,3 +1,4 @@
+
 import datetime
 import os
 
@@ -89,7 +90,7 @@ def get_process_path(process_name):
     return None
 
 
-def get_icon(path):
+def get_icon(path, size=(64, 64)):
     """
     Takes the path for a file and extracts the icon of that file.
 
@@ -112,7 +113,7 @@ def get_icon(path):
         icon_extractor = icoextract.IconExtractor(path)  # Initializes IconExtractor object with path parameter
         file_icon = icon_extractor.get_icon()  # Stores the executable icon as a BytesIO object
         icon_data = Image.open(file_icon)  # Reads the BytesIO object and produces the raw bytes
-        resized_icon = icon_data.resize((16, 16))  # Resize the image to a more appropriate size
+        resized_icon = icon_data.resize((size))  # Resize the image to a more appropriate size
         process_icon = ImageTk.PhotoImage(resized_icon)
 
         return process_icon
