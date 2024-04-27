@@ -1,0 +1,5 @@
+psutil~=5.9.8
+WMI~=1.5.1
+icoextract~=0.1.4
+pillow~=10.2.0
+pywin32==306
